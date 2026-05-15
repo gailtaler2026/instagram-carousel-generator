@@ -365,17 +365,3 @@ function extractFontName(fontFamily: string): string {
 
   return fontMap[fontName] || 'Raleway'
 }
-
-/**
- * Convert RGB to HEX if needed
- * Already receives HEX from theme, so passthrough
- */
-function ensureHexColor(color: string): string {
-  // Check if already hex
-  if (color.startsWith('#')) {
-    return color
-  }
-
-  // Fallback
-  return '#000000'
-}
