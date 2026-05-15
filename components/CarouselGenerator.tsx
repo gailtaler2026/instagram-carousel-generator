@@ -97,6 +97,62 @@ export default function CarouselGenerator() {
     }
   }
 
+  const handleExportPPTX = async () => {
+    setIsExporting(true)
+    setExportProgress('Erstelle PowerPoint...')
+    try {
+      const exportRequest = {
+        slides: slides.map((slide) => ({
+          ...slide,
+          slideNumber: slide.slideNumber,
+          totalSlides: slide.totalSlides,
+        })),
+        theme: {
+          primaryColor: preset.colors.primary,
+          secondaryColor: preset.colors.secondary,
+          backgroundColor: preset.colors.background,
+          textColor: preset.colors.text,
+          accentColor: preset.colors.accent,
+          headlineFont: preset.fonts.headline,
+          bodyFont: preset.fonts.body,
+          ctaFont: preset.fonts.cta,
+        },
+        carouselName: topic.slice(0, 30) || 'carousel',
+      }
+
+      const response = await fetch('/api/export-pptx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(exportRequest),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'PPTX export failed')
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `carousel-${topic.slice(0, 20).replace(/\s+/g, '-') || 'export'}.pptx`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setExportProgress('✅ PowerPoint heruntergeladen!')
+      setTimeout(() => setExportProgress(''), 3000)
+    } catch (err) {
+      console.error('PPTX export error:', err)
+      alert(
+        `❌ Fehler beim PowerPoint-Export: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`
+      )
+      setExportProgress('')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   const renderSlide = (slide: SlideData, index: number) => {
     const bgColor = preset.colors.background
     const textColor = preset.colors.text
@@ -400,7 +456,25 @@ export default function CarouselGenerator() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  {isExporting ? '⏳ Exportiert...' : '📥 PNG herunterladen'}
+                  {isExporting ? '⏳ Exportiert...' : '📥 PNG (ZIP)'}
+                </button>
+                <button
+                  onClick={handleExportPPTX}
+                  disabled={isExporting}
+                  style={{
+                    padding: '12px 24px',
+                    background: isExporting ? '#d1d5db' : 'linear-gradient(135deg, #ea580c, #dc2626)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: isExporting ? 'not-allowed' : 'pointer',
+                    boxShadow: isExporting ? 'none' : '0 4px 12px rgba(234,88,12,0.4)',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {isExporting ? '⏳ Exportiert...' : '📊 PPTX (PowerPoint)'}
                 </button>
                 <button
                   onClick={handleGenerate}
