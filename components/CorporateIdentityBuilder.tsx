@@ -10,12 +10,10 @@ export interface CorporateColors {
 
 interface CorporateIdentityBuilderProps {
   onColorsExtracted: (colors: CorporateColors, name: string) => void
-  isLoading?: boolean
 }
 
 export default function CorporateIdentityBuilder({
   onColorsExtracted,
-  isLoading = false,
 }: CorporateIdentityBuilderProps) {
   const [mode, setMode] = useState<'url' | 'manual' | 'description' | 'logo'>(
     'manual'
