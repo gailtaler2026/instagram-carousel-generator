@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import Anthropic from '@ai-sdk/anthropic'
+import Anthropic from '@anthropic-ai/sdk'
 
 type ResponseData = {
   slides?: any[]
