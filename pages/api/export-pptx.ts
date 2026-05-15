@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import PptxGenJS, { PresentationProps } from 'pptxgenjs'
+import PptxGenJS from 'pptxgenjs'
 
 interface SlideData {
   slideNumber: number
