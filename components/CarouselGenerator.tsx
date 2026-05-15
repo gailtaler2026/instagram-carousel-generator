@@ -22,8 +22,72 @@ export default function CarouselGenerator() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState('')
+  const [refinePrompt, setRefinePrompt] = useState('')
+  const [isRefining, setIsRefining] = useState(false)
 
   const preset = DESIGN_PRESETS[presetIndex]
+
+  // Inline-Editing: aktualisiert ein Feld eines Slides beim Verlassen (onBlur)
+  const updateSlideField = (
+    index: number,
+    field: 'headline' | 'subtitle' | 'cta' | 'buttonText',
+    value: string
+  ) => {
+    setSlides((prev) => {
+      const next = [...prev]
+      next[index] = { ...next[index], [field]: value }
+      return next
+    })
+  }
+
+  const updateBullet = (slideIndex: number, bulletIndex: number, value: string) => {
+    setSlides((prev) => {
+      const next = [...prev]
+      const bullets = [...(next[slideIndex].bullets || [])]
+      bullets[bulletIndex] = value
+      next[slideIndex] = { ...next[slideIndex], bullets }
+      return next
+    })
+  }
+
+  const editableProps = (onSave: (val: string) => void) => ({
+    contentEditable: true,
+    suppressContentEditableWarning: true,
+    onBlur: (e: React.FocusEvent<HTMLElement>) => {
+      const text = e.currentTarget.textContent || ''
+      onSave(text)
+    },
+    style: { outline: 'none', cursor: 'text' } as React.CSSProperties,
+    title: 'Klicken zum Bearbeiten',
+  })
+
+  const handleRefine = async () => {
+    if (!refinePrompt.trim() || slides.length === 0) return
+    setIsRefining(true)
+    try {
+      const response = await fetch('/api/refine-slides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slides, refinementPrompt: refinePrompt }),
+      })
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || 'Refine fehlgeschlagen')
+      }
+      const data = await response.json()
+      if (data.slides && data.slides.length > 0) {
+        setSlides(data.slides)
+        setRefinePrompt('')
+      }
+    } catch (err) {
+      console.error('Refine error:', err)
+      alert(
+        `❌ Fehler beim Überarbeiten: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`
+      )
+    } finally {
+      setIsRefining(false)
+    }
+  }
 
   const handleGenerate = async () => {
     if (!topic.trim()) return
@@ -208,10 +272,15 @@ export default function CarouselGenerator() {
               fontFamily: preset.fonts.headline,
               margin: '0 0 10px 0',
               lineHeight: 1.3,
-            }}>
+            }}
+            {...editableProps((v) => updateSlideField(index, 'headline', v))}
+            >
               {slide.headline}
             </h2>
-            <p style={{ fontSize: '12px', opacity: 0.8, margin: 0, lineHeight: 1.5 }}>
+            <p
+              style={{ fontSize: '12px', opacity: 0.8, margin: 0, lineHeight: 1.5 }}
+              {...editableProps((v) => updateSlideField(index, 'subtitle', v))}
+            >
               {slide.subtitle}
             </p>
           </div>
@@ -226,7 +295,9 @@ export default function CarouselGenerator() {
               fontFamily: preset.fonts.headline,
               margin: '0 0 10px 0',
               textAlign: 'center',
-            }}>
+            }}
+            {...editableProps((v) => updateSlideField(index, 'headline', v))}
+            >
               {slide.headline}
             </h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -239,7 +310,7 @@ export default function CarouselGenerator() {
                   lineHeight: 1.4,
                 }}>
                   <span style={{ color: accentColor, marginRight: '6px', fontWeight: 'bold', flexShrink: 0 }}>✓</span>
-                  <span>{b}</span>
+                  <span {...editableProps((v) => updateBullet(index, i, v))}>{b}</span>
                 </li>
               ))}
             </ul>
@@ -254,19 +325,24 @@ export default function CarouselGenerator() {
               fontFamily: preset.fonts.headline,
               margin: '0 0 14px 0',
               lineHeight: 1.4,
-            }}>
+            }}
+            {...editableProps((v) => updateSlideField(index, 'cta', v))}
+            >
               {slide.cta}
             </p>
-            <div style={{
-              display: 'inline-block',
-              backgroundColor: primaryColor,
-              color: bgColor,
-              padding: '8px 18px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              fontFamily: preset.fonts.cta,
-            }}>
+            <div
+              style={{
+                display: 'inline-block',
+                backgroundColor: primaryColor,
+                color: bgColor,
+                padding: '8px 18px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                fontFamily: preset.fonts.cta,
+              }}
+              {...editableProps((v) => updateSlideField(index, 'buttonText', v))}
+            >
               {slide.buttonText}
             </div>
           </div>
@@ -493,6 +569,84 @@ export default function CarouselGenerator() {
                 >
                   🔄 Neu generieren
                 </button>
+              </div>
+            </div>
+
+            {/* Refine Chat Bar */}
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '20px 28px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              marginBottom: '20px',
+            }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>
+                🤖 KI-Überarbeitung
+              </h3>
+              <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#6b7280' }}>
+                Ändere alle Slides per Anweisung – oder klicke direkt auf einen Text um ihn manuell zu bearbeiten.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  value={refinePrompt}
+                  onChange={(e) => setRefinePrompt(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !isRefining && handleRefine()}
+                  placeholder='z.B. "Mach die Headlines kürzer" oder "Schreib lockerer" oder "Übersetze auf Englisch"'
+                  disabled={isRefining}
+                  style={{
+                    flex: 1,
+                    minWidth: '240px',
+                    padding: '12px 16px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#7c3aed')}
+                  onBlur={(e) => (e.target.style.borderColor = '#e5e7eb')}
+                />
+                <button
+                  onClick={handleRefine}
+                  disabled={isRefining || !refinePrompt.trim()}
+                  style={{
+                    padding: '12px 24px',
+                    background: isRefining || !refinePrompt.trim() ? '#d1d5db' : 'linear-gradient(135deg, #7c3aed, #6366f1)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: isRefining || !refinePrompt.trim() ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {isRefining ? '⏳ Überarbeitet...' : '✨ Überarbeiten'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                {['Mach die Headlines kürzer', 'Schreib lockerer & jünger', 'Übersetze auf Englisch', 'Mehr Emojis'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setRefinePrompt(suggestion)}
+                    disabled={isRefining}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#f3f4f6',
+                      color: '#6b7280',
+                      border: 'none',
+                      borderRadius: '14px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: isRefining ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
             </div>
 

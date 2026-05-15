@@ -44,6 +44,14 @@ export default async function handler(
   try {
     const { slides, theme, carouselName = 'carousel' } = req.body as ExportRequest
 
+    // Sanitize filename: only ASCII letters, numbers, dash, underscore (HTTP headers reject special chars)
+    const safeFilename =
+      (carouselName || 'carousel')
+        .replace(/[^a-zA-Z0-9_-]/g, '-') // replace umlauts/spaces/symbols with dash
+        .replace(/-+/g, '-') // collapse multiple dashes
+        .replace(/^-+|-+$/g, '') // trim leading/trailing dashes
+        .slice(0, 50) || 'carousel'
+
     if (!slides || !Array.isArray(slides) || slides.length === 0) {
       return res.status(400).json({ error: 'Slides array is required' })
     }
@@ -77,7 +85,7 @@ export default async function handler(
 
     // Set response headers
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
-    res.setHeader('Content-Disposition', `attachment; filename="${carouselName}.pptx"`)
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}.pptx"`)
     res.setHeader('Content-Length', uint8Array.length)
 
     // Send file
