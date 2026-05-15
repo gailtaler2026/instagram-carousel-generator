@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { DesignPreset } from '@/types/preset'
 
 export interface CorporateColors {
   primary: string
