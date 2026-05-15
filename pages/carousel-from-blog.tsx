@@ -241,11 +241,11 @@ export default function CarouselFromBlog() {
                     <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded">
                       <p className="font-semibold mb-2">Beispiele:</p>
                       <ul className="space-y-1">
-                        <li>• "Übersetze alles auf Englisch"</li>
-                        <li>• "Mach die Hintergrundfarben grün (#00AA00)"</li>
-                        <li>• "Mach den Text größer und fetter"</li>
-                        <li>• "Füge Emojis hinzu"</li>
-                        <li>• "Schreib es in einem lustigen Ton"</li>
+                        <li>• &quot;Übersetze alles auf Englisch&quot;</li>
+                        <li>• &quot;Mach die Hintergrundfarben grün (#00AA00)&quot;</li>
+                        <li>• &quot;Mach den Text größer und fetter&quot;</li>
+                        <li>• &quot;Füge Emojis hinzu&quot;</li>
+                        <li>• &quot;Schreib es in einem lustigen Ton&quot;</li>
                       </ul>
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 import { DESIGN_PRESETS } from '@/types/preset'
 
 interface SampleSlide {
@@ -308,12 +309,12 @@ export default function PresetsShowcase() {
             <p className="text-lg mb-6">
               Gehe zu Design Presets um {DESIGN_PRESETS[activeTab].name} zu verwenden!
             </p>
-            <a
+            <Link
               href="/design-presets"
               className="inline-block px-8 py-3 bg-white text-blue-600 rounded-lg font-bold hover:bg-gray-100 transition"
             >
               Zu den Design Presets →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -337,9 +337,9 @@ export default function SlideEditor() {
                 Chat um alle Slides gleichzeitig zu ändern. Beispiele:
               </div>
               <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
-                <li>"Mach alle Headlines kürzer"</li>
-                <li>"Übersetze alles auf Englisch"</li>
-                <li>"Schreib professioneller"</li>
+                <li>&quot;Mach alle Headlines kürzer&quot;</li>
+                <li>&quot;Übersetze alles auf Englisch&quot;</li>
+                <li>&quot;Schreib professioneller&quot;</li>
               </ul>
             </div>
           </div>

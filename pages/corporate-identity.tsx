@@ -350,7 +350,7 @@ export default function CorporateIdentityPage() {
           {!customIdentity && (
             <div className="text-center bg-white rounded-xl shadow-lg p-12">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Los geht's! 🚀
+                Los geht&apos;s! 🚀
               </h2>
               <p className="text-xl text-gray-600">
                 Wähle eine der 4 Methoden oben um deine Corporate Identity zu
