@@ -36,7 +36,7 @@ Verwende Farben für das background Feld (hex oder rgb).
 Beispiel: [{"title": "Titel", "description": "Beschreibung", "emoji": "🎨", "background": "#FFE5B4"}]`
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1024,
       messages: [
         {
